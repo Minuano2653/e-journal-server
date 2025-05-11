@@ -23,13 +23,20 @@ class GroupController(private val groupService: GroupService) {
         val request = call.receive<CreateGroupRequest>()
         val groupId = groupService.createGroup(request, roleId)
 
-        if (groupId != null) {
-            call.respond(mapOf("groupId" to groupId.toString()))
-        } else {
-            call.respondText(
-                "Forbidden: Only admin can create groups",
-                status = HttpStatusCode.Forbidden
-            )
+        try {
+            if (groupId != null) {
+                call.respond(mapOf("groupId" to groupId.toString()))
+            } else {
+                call.respondText(
+                    "Forbidden: Only administrators can create groups",
+                    status = HttpStatusCode.Forbidden
+                )
+            }
+        } catch (e: IllegalArgumentException) {
+            call.respond(HttpStatusCode.Conflict, mapOf("error" to e.message))
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.InternalServerError, mapOf("error" to (e.message ?: "Unknown error")))
         }
+
     }
 }
