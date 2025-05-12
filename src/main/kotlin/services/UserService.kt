@@ -8,6 +8,10 @@ import java.util.*
 
 class UserService(private val userRepository: UserRepository) {
 
+    fun findStudentGroupId(studentId: UUID): UUID? {
+        return userRepository.findStudentGroupId(studentId)
+    }
+
     fun createStudent(request: CreateStudentRequest, roleId: Int): UUID? {
         return if (roleId == Role.RoleIds.ADMINISTRATOR) {
             userRepository.createStudent(request)

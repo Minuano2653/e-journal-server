@@ -7,6 +7,7 @@ import java.util.*
 
 interface UserRepository {
     fun findByEmailAndPassword(email: String, password: String): UserDto?
+    fun findStudentGroupId(studentId: UUID): UUID?
     fun createStudent(request: CreateStudentRequest): UUID
     fun createTeacher(request: CreateTeacherRequest): UUID
 }

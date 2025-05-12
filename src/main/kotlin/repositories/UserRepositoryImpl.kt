@@ -13,7 +13,8 @@ import java.util.*
 
 class UserRepositoryImpl : UserRepository {
     override fun findByEmailAndPassword(email: String, password: String): UserDto? = transaction {
-        User.selectAll()
+        User
+            .selectAll()
             .where { (User.email eq email) and (User.password eq password) }
             .map {
                 UserDto(
@@ -24,6 +25,14 @@ class UserRepositoryImpl : UserRepository {
                 )
             }
             .firstOrNull().also { println("Found user: $it") }
+    }
+
+    override fun findStudentGroupId(studentId: UUID): UUID? = transaction {
+        Student
+            .selectAll()
+            .where{ Student.userId eq studentId }
+            .map { it[Student.groupId] }
+            .firstOrNull()
     }
 
     override fun createStudent(request: CreateStudentRequest): UUID = transaction {
