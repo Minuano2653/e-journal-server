@@ -6,8 +6,18 @@ import io.ktor.server.routing.*
 
 fun Route.groupRoutes(groupController: GroupController) {
     authenticate("auth-jwt") {
-        post("/groups") {
-            groupController.createGroup(call)
+        route("/groups") {
+            post {
+                groupController.createGroup(call)
+            }
+
+            get("/teacher") {
+                groupController.getTeacherGroups(call)
+            }
+
+            get("/admin") {
+                groupController.getAllGroups(call)
+            }
         }
     }
 }
