@@ -1,7 +1,7 @@
 package com.example.repositories
 
 import com.example.models.dtos.CreateGroupRequest
-import com.example.models.dtos.AdministratorGroupDto
+import com.example.models.dtos.GroupDto
 import com.example.models.dtos.TeacherGroupDto
 import com.example.models.entities.Group
 import com.example.models.entities.Student
@@ -50,11 +50,11 @@ class GroupRepositoryImpl: GroupRepository {
             }
     }
 
-    override fun getAllGroups(): List<AdministratorGroupDto> = transaction {
+    override fun getAllGroups(): List<GroupDto> = transaction {
         Group
             .select(Group.id, Group.name)
             .map {
-                AdministratorGroupDto(
+                GroupDto(
                     it[Group.id].toString(),
                     it[Group.name]
                 )

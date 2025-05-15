@@ -1,7 +1,6 @@
 package com.example.repositories
 
-import com.example.models.dtos.GroupLessonDto
-import com.example.models.dtos.TeacherLessonDto
+import com.example.models.dtos.*
 import com.example.models.entities.*
 import org.jetbrains.exposed.sql.JoinType
 import org.jetbrains.exposed.sql.and
@@ -11,10 +10,10 @@ import java.util.*
 
 class ScheduleRepositoryImpl: ScheduleRepository {
     override fun getGroupScheduleForDay(groupId: UUID, dayOfWeek: Int): List<GroupLessonDto> = transaction {
-        (LessonSchedule
+        LessonSchedule
             .join(TeacherAssignment, JoinType.INNER, LessonSchedule.assignmentId, TeacherAssignment.id)
             .join(Subject, JoinType.INNER, TeacherAssignment.subjectId, Subject.id)
-            .join(User, JoinType.INNER, TeacherAssignment.teacherId, User.id))
+            .join(User, JoinType.INNER, TeacherAssignment.teacherId, User.id)
             .selectAll()
             .where {
                 (TeacherAssignment.groupId eq groupId) and (LessonSchedule.dayOfWeek eq dayOfWeek)
@@ -38,7 +37,7 @@ class ScheduleRepositoryImpl: ScheduleRepository {
             .join(Subject, JoinType.INNER, TeacherAssignment.subjectId, Subject.id)
             .join(Group, JoinType.INNER, TeacherAssignment.groupId, Group.id))
             .selectAll()
-            .where{
+            .where {
                 (TeacherAssignment.teacherId eq teacherId) and (LessonSchedule.dayOfWeek eq dayOfWeek)
             }
             .orderBy(LessonSchedule.lessonNumber)
@@ -47,8 +46,8 @@ class ScheduleRepositoryImpl: ScheduleRepository {
                     lessonNumber = it[LessonSchedule.lessonNumber],
                     startTime = it[LessonSchedule.startTime].toString(),
                     endTime = it[LessonSchedule.endTime].toString(),
-                    group = it[Group.name],
-                    subject = it[Subject.name],
+                    group = GroupDto(it[Group.id].toString(), it[Group.name]),
+                    subject = SubjectDto(it[Subject.id].toString(), it[Subject.name]),
                     classroom = it[LessonSchedule.classroom]
                 )
             }

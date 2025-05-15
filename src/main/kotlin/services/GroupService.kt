@@ -1,7 +1,7 @@
 package com.example.services
 
 import com.example.models.dtos.CreateGroupRequest
-import com.example.models.dtos.AdministratorGroupDto
+import com.example.models.dtos.GroupDto
 import com.example.models.dtos.TeacherGroupDto
 import com.example.models.entities.Role
 import com.example.repositories.GroupRepository
@@ -18,7 +18,7 @@ class GroupService(private val groupRepository: GroupRepository) {
         return groupRepository.getTeacherGroups(teacherId)
     }
 
-    fun getAllGroups(): List<AdministratorGroupDto> {
+    fun getAllGroups(): List<GroupDto> {
         return groupRepository.getAllGroups()
     }
 }
