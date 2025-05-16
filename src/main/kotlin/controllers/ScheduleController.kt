@@ -8,6 +8,7 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
+import java.time.LocalDate
 
 
 class ScheduleController(
@@ -24,12 +25,11 @@ class ScheduleController(
                 return
             }
 
-            val dayOfWeek = call.parameters["dayOfWeek"]?.toIntOrNull()
-            if (dayOfWeek == null || dayOfWeek !in 1..7) {
-                call.respond(HttpStatusCode.BadRequest, "Invalid day of week")
+            val date = call.parameters["date"]
+            if (date == null) {
+                call.respond(HttpStatusCode.BadRequest, "Missing or invalid date")
                 return
             }
-
 
             val groupId = userService.findStudentGroupId(studentId)
             if (groupId == null) {
@@ -37,7 +37,7 @@ class ScheduleController(
                 return
             }
 
-            val schedule = scheduleService.getGroupScheduleForDay(groupId, dayOfWeek)
+            val schedule = scheduleService.getGroupScheduleWithHomeworkForDay(groupId, LocalDate.parse(date))
             call.respond(schedule)
         } catch (e: Exception) {
             call.respond(

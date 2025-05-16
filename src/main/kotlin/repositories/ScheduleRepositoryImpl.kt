@@ -4,19 +4,24 @@ import com.example.models.dtos.*
 import com.example.models.entities.*
 import org.jetbrains.exposed.sql.JoinType
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.time.LocalDate
 import java.util.*
 
 class ScheduleRepositoryImpl: ScheduleRepository {
-    override fun getGroupScheduleForDay(groupId: UUID, dayOfWeek: Int): List<GroupLessonDto> = transaction {
+    override fun getGroupScheduleForDay(groupId: UUID, date: LocalDate): List<GroupLessonDto> = transaction {
         LessonSchedule
             .join(TeacherAssignment, JoinType.INNER, LessonSchedule.assignmentId, TeacherAssignment.id)
             .join(Subject, JoinType.INNER, TeacherAssignment.subjectId, Subject.id)
             .join(User, JoinType.INNER, TeacherAssignment.teacherId, User.id)
+            .join(Homework, JoinType.LEFT, LessonSchedule.assignmentId, Homework.assignmentId)
             .selectAll()
             .where {
-                (TeacherAssignment.groupId eq groupId) and (LessonSchedule.dayOfWeek eq dayOfWeek)
+                (TeacherAssignment.groupId eq groupId) and
+                (LessonSchedule.dayOfWeek eq date.dayOfWeek.value) and
+                ((Homework.date eq date) or (Homework.date.isNull()))
             }
             .orderBy(LessonSchedule.lessonNumber)
             .map {
@@ -26,7 +31,9 @@ class ScheduleRepositoryImpl: ScheduleRepository {
                     endTime = it[LessonSchedule.endTime].toString(),
                     subject = it[Subject.name],
                     teacher = "${it[User.surname]} ${it[User.name].first()}. ${it[User.patronymic]?.first() ?: ""}.",
-                    classroom = it[LessonSchedule.classroom]
+                    classroom = it[LessonSchedule.classroom],
+                    homework = it[Homework.description]
+
                 )
             }
     }

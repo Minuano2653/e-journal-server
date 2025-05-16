@@ -9,5 +9,6 @@ data class GroupLessonDto(
     val endTime: String,
     val subject: String,
     val teacher: String,
-    val classroom: String
+    val classroom: String,
+    val homework: String? = null
 )
