@@ -11,6 +11,7 @@ val appModule = module {
     single<GroupRepository> { GroupRepositoryImpl() }
     single<ScheduleRepository> { ScheduleRepositoryImpl() }
     single<HomeworkRepository> { HomeworkRepositoryImpl() }
+    single<JournalRepository> { JournalRepositoryImpl() }
 
     // Services
     single { AuthService(get()) }
@@ -18,6 +19,7 @@ val appModule = module {
     single { UserService(get()) }
     single { ScheduleService(get()) }
     single { HomeworkService(get()) }
+    single { JournalService(get()) }
 
     // Контроллеры
     single { AuthController(get()) }
@@ -25,4 +27,5 @@ val appModule = module {
     single { UserController(get()) }
     single { ScheduleController(get(), get()) }
     single { HomeworkController(get()) }
+    single { JournalController(get()) }
 }

@@ -1,0 +1,62 @@
+package com.example.controllers
+
+import com.example.models.dtos.StudentGradesResponse
+import com.example.models.entities.Role
+import com.example.services.JournalService
+import com.example.utils.getRoleId
+import com.example.utils.getUserId
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
+import io.ktor.server.response.*
+
+
+class JournalController(private val journalService: JournalService) {
+
+    suspend fun getStudentGrades(call: ApplicationCall) {
+        val principal = call.principal<JWTPrincipal>()
+        val studentId = principal?.getUserId()
+        val roleId = principal?.getRoleId()
+
+        if (studentId == null || roleId == null) {
+            call.respond(HttpStatusCode.Unauthorized, "Missing or invalid JWT")
+            return
+        }
+
+        try {
+            // Get parameters from the request
+            val subjectId = call.parameters["subjectId"]?.toIntOrNull()
+            val year = call.parameters["year"]?.toIntOrNull()
+            val month = call.parameters["month"]?.toIntOrNull()
+
+            // Validate required parameters
+            if (subjectId == null || year == null || month == null) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    mapOf("error" to "Missing required parameters: subjectId, year, and month are required")
+                )
+                return
+            }
+
+            // Validate that users can only access their own grades unless they are a teacher or admin
+            if (roleId != Role.RoleIds.STUDENT) {
+                call.respond(
+                    HttpStatusCode.Forbidden,
+                    mapOf("error" to "Students can only access their own grades")
+                )
+                return
+            }
+
+            // Get grades from the service
+            val grades = journalService.getStudentGradesForMonth(studentId, subjectId, year, month)
+
+            call.respond(StudentGradesResponse(grades))
+
+        } catch (e: IllegalArgumentException) {
+            call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.InternalServerError, mapOf("error" to (e.message ?: "Unknown error")))
+        }
+    }
+}

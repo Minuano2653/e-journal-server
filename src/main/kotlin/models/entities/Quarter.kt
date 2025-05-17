@@ -3,11 +3,11 @@ package com.example.models.entities
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.date
 
-object Homework: Table("homework") {
+
+object Quarter: Table("quarter") {
     val id = integer("id").autoIncrement()
-    val assignmentId = integer("assignment_id").references(TeacherAssignment.id)
-    val date = date("date")
-    val description = text("description")
+    val startDate = date("start_date")
+    val endDate = date("end_date")
 
     override val primaryKey = PrimaryKey(id)
 }

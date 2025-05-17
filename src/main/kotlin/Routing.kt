@@ -12,6 +12,7 @@ fun Application.configureRouting() {
     val userController: UserController by inject()
     val scheduleController: ScheduleController by inject()
     val homeworkController: HomeworkController by inject()
+    val journalController: JournalController by inject()
 
     routing {
         authRoutes(authController)
@@ -19,5 +20,6 @@ fun Application.configureRouting() {
         userRoutes(userController)
         scheduleRoutes(scheduleController)
         homeworkRoutes(homeworkController)
+        journalRoutes(journalController)
     }
 }
