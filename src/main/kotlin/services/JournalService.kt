@@ -1,6 +1,7 @@
 package com.example.services
 
 import com.example.models.dtos.JournalEntryDto
+import com.example.models.dtos.StudentPerformanceResponse
 import com.example.repositories.JournalRepository
 import java.time.YearMonth
 import java.util.*
@@ -18,5 +19,13 @@ class JournalService(private val journalRepository: JournalRepository) {
         val endDate = yearMonth.atEndOfMonth()
 
         return journalRepository.getStudentGrades(studentId, subjectId, startDate, endDate)
+    }
+
+    fun getStudentPerformance(
+        studentId: UUID,
+        subjectId: Int
+    ): StudentPerformanceResponse {
+        val (quarterGrades, attendanceStats) = journalRepository.getStudentPerformance(studentId, subjectId)
+        return StudentPerformanceResponse(quarterGrades, attendanceStats)
     }
 }

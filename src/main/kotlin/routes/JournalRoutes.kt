@@ -7,11 +7,13 @@ import io.ktor.server.routing.*
 fun Route.journalRoutes(journalController: JournalController) {
     authenticate("auth-jwt") {
         route("/journal") {
-            get("/grades/{subjectId}/{year}/{month}") {
+            get("/grades/subject/{subjectId}/year/{year}/month/{month}") {
                 journalController.getStudentGrades(call)
             }
 
-
+            get("/performance/subject/{subjectId}") {
+                journalController.getStudentPerformance(call)
+            }
         }
     }
 }

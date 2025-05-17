@@ -59,4 +59,48 @@ class JournalController(private val journalService: JournalService) {
             call.respond(HttpStatusCode.InternalServerError, mapOf("error" to (e.message ?: "Unknown error")))
         }
     }
+
+    suspend fun getStudentPerformance(call: ApplicationCall) {
+        val principal = call.principal<JWTPrincipal>()
+        val studentId = principal?.getUserId()
+        val roleId = principal?.getRoleId()
+
+        if (studentId == null || roleId == null) {
+            call.respond(HttpStatusCode.Unauthorized, "Missing or invalid JWT")
+            return
+        }
+
+        try {
+            // Get parameters from the request
+            val subjectId = call.parameters["subjectId"]?.toIntOrNull()
+
+            // Validate required parameters
+            if (subjectId == null) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    mapOf("error" to "Missing required parameter: subjectId is required")
+                )
+                return
+            }
+
+            // Validate that users can only access their own performance unless they are a teacher or admin
+            if (roleId != Role.RoleIds.STUDENT) {
+                call.respond(
+                    HttpStatusCode.Forbidden,
+                    mapOf("error" to "Students can only access their own performance data")
+                )
+                return
+            }
+
+            // Get performance data from the service
+            val performanceData = journalService.getStudentPerformance(studentId, subjectId)
+
+            call.respond(HttpStatusCode.OK, performanceData)
+
+        } catch (e: IllegalArgumentException) {
+            call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.InternalServerError, mapOf("error" to (e.message ?: "Unknown error")))
+        }
+    }
 }
