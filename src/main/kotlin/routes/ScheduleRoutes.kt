@@ -11,7 +11,7 @@ fun Route.scheduleRoutes(scheduleController: ScheduleController) {
                 scheduleController.getGroupScheduleForDay(call)
             }
 
-            get("/teacher/day/{dayOfWeek}") {
+            get("/teacher/date/{date}") {
                 scheduleController.getTeacherScheduleForDay(call)
             }
         }

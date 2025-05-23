@@ -14,6 +14,10 @@ fun Route.journalRoutes(journalController: JournalController) {
             get("/performance/subject/{subjectId}") {
                 journalController.getStudentPerformance(call)
             }
+
+            get("/group/{groupId}/subject/{subjectId}/date/{date}") {
+                journalController.getGroupGrades(call)
+            }
         }
     }
 }

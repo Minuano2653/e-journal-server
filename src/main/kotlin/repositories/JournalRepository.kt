@@ -1,6 +1,7 @@
 package com.example.repositories
 
 import com.example.models.dtos.AttendanceStatsDto
+import com.example.models.dtos.GroupGradesResponse
 import com.example.models.dtos.JournalEntryDto
 import com.example.models.dtos.QuarterGradeDto
 import java.time.LocalDate
@@ -18,4 +19,11 @@ interface JournalRepository {
         studentId: UUID,
         subjectId: Int
     ): Pair<List<QuarterGradeDto>, AttendanceStatsDto>
+
+    fun getGroupGradesForDate(
+        teacherId: UUID,
+        groupId: UUID,
+        subjectId: Int,
+        date: LocalDate
+    ): GroupGradesResponse?
 }

@@ -7,5 +7,5 @@ import java.util.*
 
 interface ScheduleRepository {
     fun getGroupScheduleForDay(groupId: UUID, date: LocalDate): List<GroupLessonDto>
-    fun getTeacherScheduleForDay(teacherId: UUID, dayOfWeek: Int): List<TeacherLessonDto>
+    fun getTeacherScheduleForDay(teacherId: UUID, date: LocalDate): List<TeacherLessonDto>
 }

@@ -18,7 +18,6 @@ fun Route.homeworkRoutes(homeworkController: HomeworkController) {
             get("/group/{groupId}/subject/{subjectId}/date/{date}") {
                 homeworkController.getHomeworkForTeacher(call)
             }
-
         }
     }
 }

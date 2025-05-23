@@ -1,17 +1,14 @@
 package com.example.repositories
 
-import com.example.models.dtos.AttendanceStatsDto
-import com.example.models.dtos.JournalEntryDto
-import com.example.models.dtos.QuarterGradeDto
-import com.example.models.entities.JournalEntry
-import com.example.models.entities.Quarter
-import com.example.models.entities.TeacherAssignment
+import com.example.models.dtos.*
+import com.example.models.entities.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 
+@Suppress("LanguageDetectionInspection")
 class JournalRepositoryImpl: JournalRepository {
     override fun getStudentGrades(
         studentId: UUID,
@@ -109,6 +106,64 @@ class JournalRepositoryImpl: JournalRepository {
         )
 
         Pair(quarterGrades, attendanceStats)
+    }
+
+    override fun getGroupGradesForDate(
+        teacherId: UUID,
+        groupId: UUID,
+        subjectId: Int,
+        date: LocalDate
+    ): GroupGradesResponse? = transaction {
+        // Единый запрос, который получает все необходимые данные за один раз
+        val result = TeacherAssignment
+            .join(Group, JoinType.INNER, TeacherAssignment.groupId, Group.id)
+            .join(Subject, JoinType.INNER, TeacherAssignment.subjectId, Subject.id)
+            .join(Student, JoinType.INNER, Student.groupId, Group.id)
+            .join(User, JoinType.INNER, Student.userId, User.id)
+            .join(JournalEntry, JoinType.LEFT, additionalConstraint = {
+                (JournalEntry.assignmentId eq TeacherAssignment.id) and
+                        (JournalEntry.studentId eq Student.userId) and
+                        (JournalEntry.date eq date)
+            })
+            .selectAll()
+            .where {
+                (TeacherAssignment.teacherId eq teacherId) and
+                        (TeacherAssignment.groupId eq groupId) and
+                        (TeacherAssignment.subjectId eq subjectId)
+            }
+            .toList()
+
+        // Если результат пустой, значит у учителя нет доступа к этой группе/предмету
+        if (result.isEmpty()) {
+            return@transaction null
+        }
+
+        // Извлекаем данные из первой строки (группа и предмет одинаковые для всех строк)
+        val firstRow = result.first()
+        val groupName = firstRow[Group.name]
+        val subjectName = firstRow[Subject.name]
+
+        // Формируем список студентов с их оценками
+        val students = result.map { row ->
+            val studentId = row[Student.userId]
+            val studentName = "${row[User.surname]} ${row[User.name]}" +
+                    if (row[User.patronymic] != null) " ${row[User.patronymic]}" else ""
+
+            StudentGradeDto(
+                studentId = studentId.toString(),
+                studentName = studentName,
+                journalEntryId = row.getOrNull(JournalEntry.id),
+                grade = row.getOrNull(JournalEntry.grade),
+                attendanceStatus = row.getOrNull(JournalEntry.attendanceStatus)?.get(0)
+            )
+        }
+
+        GroupGradesResponse(
+            date = date.format(DateTimeFormatter.ISO_DATE),
+            groupName = groupName,
+            subjectName = subjectName,
+            students = students
+        )
     }
 
     companion object {

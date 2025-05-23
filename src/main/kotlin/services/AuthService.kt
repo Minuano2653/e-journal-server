@@ -21,7 +21,7 @@ class AuthService(private val userRepository: UserRepository) {
             .withAudience(JwtConfig.AUDIENCE)
             .withClaim(JwtConfig.USER_ID_CLAIM, userId.toString()) // UUID как строка
             .withClaim(JwtConfig.ROLE_ID_CLAIM, roleId)
-            .withExpiresAt(Date(System.currentTimeMillis() + 86400000))
+            .withExpiresAt(Date(System.currentTimeMillis() + 864000000))
             .sign(JwtConfig.getAlgorithm())
     }
 

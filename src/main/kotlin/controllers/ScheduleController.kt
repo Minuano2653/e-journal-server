@@ -57,13 +57,13 @@ class ScheduleController(
                 return
             }
 
-            val dayOfWeek = call.parameters["dayOfWeek"]?.toIntOrNull()
-            if (dayOfWeek == null || dayOfWeek !in 1..7) {
-                call.respond(HttpStatusCode.BadRequest, "Invalid day of week")
+            val date = call.parameters["date"]
+            if (date == null) {
+                call.respond(HttpStatusCode.BadRequest, "Missing or invalid date")
                 return
             }
 
-            val schedule = scheduleService.getTeacherScheduleForDay(teacherId, dayOfWeek)
+            val schedule = scheduleService.getTeacherScheduleForDay(teacherId, LocalDate.parse(date))
             call.respond(schedule)
         } catch (e: Exception) {
             call.respond(

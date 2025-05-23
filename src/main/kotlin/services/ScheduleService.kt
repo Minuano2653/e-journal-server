@@ -14,8 +14,8 @@ class ScheduleService(
         return GroupScheduleResponse(lessons)
     }
 
-    fun getTeacherScheduleForDay(teacherId: UUID, dayOfWeek: Int): TeacherScheduleResponse {
-        val lessons = scheduleRepository.getTeacherScheduleForDay(teacherId, dayOfWeek)
+    fun getTeacherScheduleForDay(teacherId: UUID, date: LocalDate): TeacherScheduleResponse {
+        val lessons = scheduleRepository.getTeacherScheduleForDay(teacherId, date)
         return TeacherScheduleResponse(lessons)
     }
 }
